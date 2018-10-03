@@ -3,16 +3,16 @@ const kafka = require('kafka-node'),
   client = new kafka.Client(),
   consumer = new Consumer(client, [
     { topic: 'wks.dpm.p1.kpi', partition: 0 },
-    { topic: 'test', partition: 0 },
-    { topic: 'topic1' },
-    { topic: 'topic2' },
-    { topic: 'topic4', partition: 1 }
+    { topic: 'topic4', partition: 0 },
+    { topic: 'topic4', partition: 1 },
+    { topic: 'topic4', partition: 2 },
   ], {
-    autoCommit: false
+    autoCommit: false,
+    groupId: 'Steve-Y-Lin',
+    fromOffset: false,
   });
 
-// client.loadMetadataForTopics(['test']);
-
-consumer.on('message', (message) => {
+consumer.on('message', (message, err) => {
+  if(err) throw console.log(err);
   console.log(message);
 });

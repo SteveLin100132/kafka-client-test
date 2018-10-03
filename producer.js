@@ -24,6 +24,7 @@ let i40_event = {
   km = new KeyedMessage(JSON.stringify(i40_event), JSON.stringify(evt_data)),
   payloads = [
     { topic: 'wks.dpm.p1.kpi', messages: km, partition: 0 },
+    { topic: 'topic4', messages: "This topic4 partition 0", partition: 0 },
     { topic: 'topic4', messages: "This topic4 partition 1", partition: 1 },
   ];
 
@@ -41,4 +42,6 @@ producer.on('ready', function () {
   // }, 1000);
 });
 
-producer.on('error', function (err) { })
+producer.on('error', function (err) { 
+  console.log(err);
+})
