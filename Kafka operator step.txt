@@ -1,0 +1,35 @@
+# start zookeeper service (port: 2181)
+bin\windows\zookeeper-server-start.bat config\zookeeper.properties
+
+# start kafka broker serivce (port: 9092)
+bin\windows\kafka-server-start.bat config\server.properties
+
+# create a new kafka topic "test"
+bin\windows\kafka-topics.bat --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+
+# list out all kafka topic
+bin\windows\kafka-topics.bat --list --zookeeper localhost:2181
+
+# describe specific kafka topic "test"
+bin\windows\kafka-topics.bat --describe --zookeeper localhost:2181 --topic test
+
+# publish data to specific kafka topic "test"
+bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic test
+
+>Hello
+>Hello2
+
+# publish data with key & value to specific kafka topic "test"
+bin\windows\kafka-console-producer.bat --broker-list localhost:9092 ^
+--topic test ^
+--property "parse.key=true" ^
+--property "key.separator=:"
+
+>8703147:Hello3
+>8703147:Hello4
+
+# subscribe specific kafka topic "test"
+bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test --from-beginning
+
+# subscribe specific kafka topic "test" with key & value displayed
+bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test --from-beginning --property print.key=true --property key.separator=":"

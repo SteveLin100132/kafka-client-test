@@ -1,0 +1,125 @@
+# ***************************************************
+# *** Kafka Topic configuration operation samples ***
+# ***************************************************
+
+# start zookeeper service (port: 2181)
+bin\windows\zookeeper-server-start.bat config\zookeeper.properties
+
+# start kafka broker serivce (port: 9092)
+bin\windows\kafka-server-start.bat config\server.properties
+
+# create a new kafka topic "my-topic"
+bin\windows\kafka-topics.bat --create ^
+  --zookeeper localhost:2181 ^
+  --replication-factor 1 ^
+  --partitions 3 ^
+  --topic my-topic ^
+  --config max.message.bytes=64000 ^
+  --config flush.messages=1
+
+# describe and show configurations of topic "my-topic"
+bin\windows\kafka-topics.bat --zookeeper localhost:2181 ^
+  --topic my-topic ^
+  --describe
+  
+# update specific configuration
+bin\windows\kafka-topics.bat --zookeeper localhost:2181 ^
+  --topic my-topic ^
+  --alter ^
+  --config max.message.bytes=128000
+  
+  
+# delete specific configuration
+bin\windows\kafka-topics.bat --zookeeper localhost:2181 ^
+  --topic my-topic ^
+  --alter ^
+  --delete-config  max.message.bytes
+  
+
+# describe and show configurations of topic "my-topic" (less information))
+bin\windows\kafka-configs.bat --zookeeper localhost:2181 ^
+  --entity-type topics  ^
+  --entity-name my-topic ^
+  --describe
+  
+# update specific configuration
+bin\windows\kafka-configs.bat --zookeeper localhost:2181 ^ (less information)
+  --entity-type topics  ^
+  --entity-name my-topic ^
+  --alter ^
+  --add-config max.message.bytes=128000
+  
+# delete specific configuration
+bin\windows\kafka-configs.bat --zookeeper localhost:2181 ^
+  --entity-type topics  ^
+  --entity-name my-topic ^
+  --alter ^
+  --delete-config max.message.bytes
+  
+# ****************************************************
+# *** Kafka Broker configuration operation samples ***
+# ****************************************************
+
+# from Kafka version 1.1 onwards, some of the broker configs can be updated without restarting the broker.
+# To alter the current broker configs for broker id 0 (for example, the number of log cleaner threads):
+bin\windows\kafka-configs.bat --bootstrap-server localhost:9092 ^
+  --entity-type brokers ^
+  --entity-name 0 ^
+  --alter ^
+  --add-config log.cleaner.threads=2  
+
+
+# describe and show configurations broker-0
+bin\windows\kafka-configs.bat --bootstrap-server localhost:9092 ^
+  --entity-type brokers ^
+  --entity-name 0 ^
+  --describe
+
+# describe and show configurations broker-0
+bin\windows\kafka-configs.bat --bootstrap-server localhost:9092 ^
+  --entity-type brokers ^
+  --entity-name 0 ^
+  --alter ^
+  --delete-config log.cleaner.threads
+
+# ****************************************************
+# *** Kafka Broker log compaction operation sample ***
+# ****************************************************
+
+# create our topic with appropriate configs
+bin\windows\kafka-topics.bat --zookeeper localhost:2181 --create ^
+  --topic employee-salary-compact ^
+  --partitions 1 --replication-factor 1 ^
+  --config cleanup.policy=compact ^
+  --config min.cleanable.dirty.ratio=0.00001 ^
+  --config segment.ms=10000
+			 
+# describe and show configurations of topic "employee-salary-compact"
+bin\windows\kafka-configs.bat --zookeeper localhost:2181 ^
+  --entity-type topics  ^
+  --entity-name employee-salary-compact ^
+  --describe
+  
+# in a new console, we start a consumer
+bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 ^
+  --topic employee-salary-compact ^
+  --from-beginning ^
+  --property print.key=true ^
+  --property key.separator=,
+  
+# we start pushing data to the topic
+bin\windows\kafka-console-producer.bat --broker-list localhost:9092 ^
+--topic employee-salary-compact ^
+--property parse.key=true ^
+--property key.separator=,
+
+# copy these messages:
+123,{"John":"80000"}
+456,{"Mark":"90000"}
+789,{"Lisa":"95000"}
+
+# we observe that the messages have been pushed and read by the consumer
+
+# we know push the following new messages (after 20~30 seconds later)
+789,{"Lisa":"110000"}
+123,{"John":"100000"}
